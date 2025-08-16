@@ -31,6 +31,13 @@ resource "proxmox_virtual_environment_container" "lxc" {
           gateway = ipv4.value.ipv4_gateway
         }
       }
+      dynamic "ipv6" {
+        for_each = var.ipv6
+        content {
+          address = ipv6.value.ipv6_address
+          gateway = ipv6.value.ipv6_gateway
+        }
+      }
     }
 
     user_account {

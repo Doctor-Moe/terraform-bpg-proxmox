@@ -152,6 +152,18 @@ variable "ipv4" {
   }]
 }
 
+variable "ipv6" {
+  type = list(object({
+    ipv6_address = optional(string, null)
+    ipv6_gateway = optional(string, null)
+    }
+  ))
+  default = [{
+    ipv6_address = null
+    ipv6_gateway = null
+  }]
+}
+
 ## Default User Variables
 variable "user_ssh_key_public" {
   description = "Public SSH Key for LXC user"
