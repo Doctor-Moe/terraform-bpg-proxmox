@@ -72,10 +72,18 @@ module "single_lxc" {
   memory_swap         = 1024
   user_ssh_key_public = "~/.ssh/id_ed25519.pub"
   vlan_tag            = 1
+  macaddr             = "01:02:03:FF:AA:BB"  # Optional user-defined MAC address
+  # ipv4 = []  # This disables IPv4
   ipv4 = [
     {
       ipv4_address = "192.168.1.100/24"
       ipv4_gateway = "192.168.1.1"
+    },
+  ]
+  # ipv6 = []  # This disables IPv6
+  ipv6 = [
+    {
+      ipv6_address = "auto"  # Enable SLAAC
     },
   ]
 }

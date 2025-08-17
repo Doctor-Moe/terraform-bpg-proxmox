@@ -140,6 +140,20 @@ variable "vlan_tag" {
   default     = null
 }
 
+variable "macaddr" {
+  description = "Network interface MAC address"
+  type        = string 
+  default     = null
+  validation {
+    condition   = (
+      var.macaddr == null ? true : (
+      can(regex("^(?:[0-9A-Fa-f]{2}[:-]){5}(?:[0-9A-Fa-f]{2})$", var.macaddr))
+      ) 
+    )
+    error_message = "Error: incorrect MAC address format."
+  }
+}
+
 variable "ipv4" {
   type = list(object({
     ipv4_address = optional(string, null)
@@ -150,7 +164,25 @@ variable "ipv4" {
     ipv4_address = "dhcp"
     ipv4_gateway = null
   }]
+  validation {
+    condition = alltrue(
+      [for a in var.ipv4 :
+        ( ( (a.ipv4_address == null || a.ipv4_address == "dhcp") && a.ipv4_gateway == null )  ) ? true :
+          can(regex("^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))$", a.ipv4_address)) &&
+          can(regex("^([0-9]{1,3}\\.){3}[0-9]{1,3}(\\/([0-9]|[1-2][0-9]|3[0-2]))?$", a.ipv4_gateway))
+      ]
+                                    
+    )
+    error_message = <<-EOT
+      Error: Incorrect IP address or gatewway format, or improper IP configuration.
+
+             Do not specify any gateway whenever ip_address is "dhcp".
+             Use 'CIDR' format for ip_address (xx.xxx.xx.x/xx - do NOT omit netmask).
+      EOT
+                                                
+  }
 }
+
 
 variable "ipv6" {
   type = list(object({
@@ -159,9 +191,24 @@ variable "ipv6" {
     }
   ))
   default = [{
-    ipv6_address = null
+    ipv6_address = "auto"
     ipv6_gateway = null
   }]
+  validation {
+    condition = alltrue(
+      [for a in var.ipv6 :
+      ( ( (a.ipv6_address == null || a.ipv6_address == "dhcp" || a.ipv6_address == "auto") && a.ipv6_gateway == null) ) ? true :
+        can(regex("^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))(\\/((1(1[0-9]|2[0-8]))|([0-9][0-9])|([0-9])))$", a.ipv6_address)) &&
+        can(regex("^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))(\\/((1(1[0-9]|2[0-8]))|([0-9][0-9])|([0-9])))?$", a.ipv6_gateway))
+      ]
+    )
+    error_message = <<-EOT
+      Error: Incorrect IP address or gatewway format, or improper IP configuration.
+
+             Do not specify any gateway whenever ip_address is "dhcp" or "auto".
+             Use 'CIDR' format for ip_address (xx.xxx.xx.x/xx - do NOT omit netmask).
+      EOT
+  }
 }
 
 ## Default User Variables

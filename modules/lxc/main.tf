@@ -47,13 +47,15 @@ resource "proxmox_virtual_environment_container" "lxc" {
   }
 
   network_interface {
-    name    = var.vnic_name
-    bridge  = var.vnic_bridge
-    vlan_id = var.vlan_tag
+    name        = var.vnic_name
+    bridge      = var.vnic_bridge
+    vlan_id     = var.vlan_tag
+    mac_address = var.macaddr
   }
 
   cpu {
     cores = var.vcpu
+    units = 100  # Workaround upstream provider inconsistency.
   }
 
   memory {

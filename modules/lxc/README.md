@@ -46,9 +46,12 @@
 | vnic_name    | `eth0`  | String       | Networking adapter name                                               | no       |
 | vnic_bridge  | `vmbr0` | String       | Networking adapter bridge                                             | no       |
 | vlan_tag     | `null`  | Number       | Network adapter VLAN tag                                              | no       |
-| ipv4         |         | List(Object) | Defaults to DHCP, see example below for setting static IP and Gateway | no       |
-| ipv4_address | `dhcp`  | String       | Defaults to DHCP, for static IPv4 address set CIDR                    | no       |
+| macaddr      | `null`  | Number       | User defined MAC address                                              | no       |
+| ipv4         |         | List(Object) | No defaults, specify IPV4, IPv6 or both, cf. example below            | no       |
+| ipv4_address | `null`  | String       | Defaults to DHCP, for static IPv4 address set CIDR                    | no       |
 | ipv4_gateway | `null`  | String       | Defaults to DHCP, for static IPv4 gateway set IP address              | no       |
+| ipv6         |         | List(Object) | "auto" for SLAAC, "dhcp" for DHCP, ip/netmask for static addres       | no       |
+| ipv6_gateway | `null`  | String       | Defaults to SLAAC, for static IPv6 gateway set IP address             | no       |
 
 Example:
 
@@ -57,10 +60,17 @@ module "lxc_static_ip_config" {
   source = "github.com/trfore/terraform-bpg-proxmox//modules/lxc"
   ...
 
+  # ipv4 = []  # This disables IPv4
   ipv4 = [
     {
       ipv4_address = "192.168.1.103/24"
       ipv4_gateway = "192.168.1.1"
+    },
+  ]
+  # ipv6 = []  # This disables IPv6
+  ipv6 = [
+    {
+      ipv6_address = "auto"  # Enable SLAAC
     },
   ]
 }
