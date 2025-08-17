@@ -25,14 +25,14 @@ resource "proxmox_virtual_environment_container" "lxc" {
 
     ip_config {
       dynamic "ipv4" {
-        for_each = var.ipv4
+        for_each = {for k,v in var.ipv4: k => v if v != null}
         content {
           address = ipv4.value.ipv4_address
           gateway = ipv4.value.ipv4_gateway
         }
       }
       dynamic "ipv6" {
-        for_each = var.ipv6
+        for_each = {for k,v in var.ipv6: k => v if v != null}
         content {
           address = ipv6.value.ipv6_address
           gateway = ipv6.value.ipv6_gateway

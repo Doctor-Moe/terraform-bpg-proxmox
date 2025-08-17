@@ -142,7 +142,7 @@ variable "vlan_tag" {
 
 variable "ipv4" {
   type = list(object({
-    ipv4_address = optional(string, "dhcp")
+    ipv4_address = optional(string, null)
     ipv4_gateway = optional(string, null)
     }
   ))
